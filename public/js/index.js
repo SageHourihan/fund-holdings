@@ -2,7 +2,7 @@ $(document).ready(function() {
     $('#submit').on('click', function(){
         let funds = $('#funds').val();
         $.ajax ({
-            url: '../../src/Services/getFunds.php',
+            url: '../src/api/getFunds.php',
             type: 'GET',
             data: {funds:funds},
             success: function(response){
