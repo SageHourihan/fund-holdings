@@ -53,7 +53,7 @@ foreach($funds as $fund){
     // loop through rows
     foreach($rows as $row){
         // get all cells
-        $cells = $row->getElementsByTagName('a');
+        $cells = $row->getElementsByTagName('td');  
         
         // skip if not enough enough cells
         if($cells->length < 5) continue;
@@ -62,7 +62,7 @@ foreach($funds as $fund){
         $rank = trim($cells->item(0)->textContent);
         
         // check if ticker has a link
-        $tickerCell = $cell->item(1);
+        $tickerCell = $cells->item(1);
         $ticker = trim($tickerCell->textContent);
 
         $tickerLink = $tickerCell->getElementsByTagName('a');
@@ -91,18 +91,26 @@ foreach($funds as $fund){
         ];
         
     }
-    
 }
 
+// print header
+echo str_pad("Rank", 5) . " | |";
+echo str_pad("Tickerk", 8) . " | ";
+echo str_pad("Company", 40) . " | ";
+echo str_pad("Percentage", 10) . " | ";
+echo "Shares" . PHP_EOL;
 
+echo str_repeat("-", 80) . PHP_EOL;
 
+//print each holding formatted in table
+foreach($holdings as $holding){
+    echo str_pad($holding['rank'], 5) . " | ";
+    echo str_pad($holding['ticker'], 8) . " | ";
+    echo str_pad(substr($holding['company'], 0, 38), 40) . " | ";
+    echo str_pad($holding['percentage'], 10) . " | ";
+    echo $holding['shares'] . PHP_EOL;
+}
 
-
-
-
-
-
-
-
-
+// print summary
+echo PHP_EOL . "Total holdings: " . count($holdings) . PHP_EOL;
 
