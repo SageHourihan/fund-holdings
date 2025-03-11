@@ -1,5 +1,7 @@
 <?php 
-
+require_once __DIR__ . '/../../vendor/autoload.php';
+use services\FundsHandler;
+$fundsHandler = new FundsHandler();
 // get data sent from ajax
 $data = $_GET['funds'];
 
@@ -11,6 +13,9 @@ $holdings = [];
 
 // loop through funds
 foreach($funds as $fund){
+
+    // insert fund
+    $insert = $fundsHandler->insert_fund($fund);
 
     //url to scrape
     $url = "https://stockanalysis.com/quote/mutf/$fund/holdings/";
@@ -76,7 +81,7 @@ foreach($funds as $fund){
 
         // check if there is a shares column
         $shares = "";
-        if($cells->lenght > 4){
+        if($cells->length > 4){
             $shares = trim($cells->item(4)->textContent);
         }
     
