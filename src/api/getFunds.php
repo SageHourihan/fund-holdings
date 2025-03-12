@@ -41,6 +41,7 @@ foreach($funds as $fund) {
         // If fund exists, you might want to get its data from the database
         // This part depends on your FundsHandler implementation
         // For now, we'll just scrape it again to ensure the script works
+        // TODO: pull from db
         $fundHoldings = scrape($fund);
         if (!empty($fundHoldings)) {
             $allHoldings[$fund] = $fundHoldings;
@@ -66,6 +67,7 @@ echo str_repeat("-", 90) . PHP_EOL;
 // print each holding formatted in table
 $totalHoldings = 0;
 
+//TODO: insert holdings into db
 foreach ($allHoldings as $fund => $holdings) {
     foreach ($holdings as $holding) {
         echo str_pad($fund, 10) . " | ";

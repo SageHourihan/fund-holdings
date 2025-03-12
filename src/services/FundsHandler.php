@@ -44,4 +44,9 @@ class FundsHandler {
 
         if($error) error_log(json_encode($error));
     }
+    
+    public function insert_holding($holding){
+        $error = null;
+    }
+
 }
