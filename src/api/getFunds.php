@@ -69,7 +69,9 @@ $totalHoldings = 0;
 
 //TODO: insert holdings into db
 foreach ($allHoldings as $fund => $holdings) {
-    foreach ($holdings as $holding) {
+    $fund_id = $fundsHandler->get_fund($fund)['id'];
+     foreach ($holdings as $holding) {
+        $fundsHandler->insert_holding($fund_id, $holding);
         echo str_pad($fund, 10) . " | ";
         echo str_pad($holding['rank'], 5) . " | ";
         echo str_pad($holding['ticker'], 8) . " | ";

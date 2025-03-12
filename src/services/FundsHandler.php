@@ -36,8 +36,12 @@ class FundsHandler {
             $stmt->execute([
             ":fund" => $fund
             ]);
-            $stmt->fetch();
-
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if($result && isset($result['id']))
+                return $result;
+            else
+                return false;    
         } catch (Exception $e) {
             $error = $e->getMessage();
         }
@@ -45,8 +49,26 @@ class FundsHandler {
         if($error) error_log(json_encode($error));
     }
     
-    public function insert_holding($holding){
+    public function insert_holding($fund_id, $holding){
         $error = null;
+        try {
+            // clean shares of commma
+            $shares = str_replace(',', '', $holding['shares']);
+            $stmt = $this->pdo->prepare("INSERT INTO fund_holdings (fund_id, stock_ticker, stock_name, percent_weight, shares) VALUES(:fund_id, :stock_ticker, :stock_name, :percent_weight, :shares)");
+        $stmt->execute([
+        ":fund_id" => $fund_id,
+        ":stock_ticker" => $holding['ticker'],
+        ":stock_name" => $holding['company'],
+        ":percent_weight" => $holding['percentage'],
+        ":shares" => $shares
+        ]);
+    
+        return true;
+
+        } catch (Exception $e) {
+            $error = $e->getMessage();;
+        }   
+        if($error) error_log(json_encode($error));
     }
 
 }
