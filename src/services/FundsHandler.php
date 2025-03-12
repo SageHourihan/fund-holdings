@@ -26,7 +26,22 @@ class FundsHandler {
         }catch(Exception $e){
             $error = $e->getMessage();
         }
-        if($error)
-            error_log(json_encode($error));
+        if($error) error_log(json_encode($error));
      }
+
+    public function get_fund($fund){
+        $error = null;
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM funds WHERE ticker = :fund");
+            $stmt->execute([
+            ":fund" => $fund
+            ]);
+            $stmt->fetch();
+
+        } catch (Exception $e) {
+            $error = $e->getMessage();
+        }
+
+        if($error) error_log(json_encode($error));
+    }
 }
