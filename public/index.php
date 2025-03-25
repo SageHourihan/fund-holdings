@@ -6,8 +6,6 @@
     <input id='funds' type='text' placeholder="Enter fund tickers (comma-separated)"></input>
     <input id='investments' type='text' placeholder="Corresponding investments (comma-separated)">
     <button id='submit'>Submit</button>
-    <div id='body'>
-
-    </div>
+    <div id='body'></div>
 </body>
 </html>
