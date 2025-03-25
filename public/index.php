@@ -3,10 +3,11 @@
     <div id="loader" class="loader" style="display:none;">
         <div class="spinner"></div>
     </div>
-    <input id='funds' type='text'></input>
+    <input id='funds' type='text' placeholder="Enter fund tickers (comma-separated)"></input>
+    <input id='investments' type='text' placeholder="Corresponding investments (comma-separated)">
     <button id='submit'>Submit</button>
     <div id='body'>
-        
-    </div>  
+
+    </div>
 </body>
 </html>
