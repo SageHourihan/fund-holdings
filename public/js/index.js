@@ -46,6 +46,9 @@ $(document).ready(function() {
                 // Clear previous content and insert the new table
                 $('#body').html(response);
                 
+                // Add sorting and filtering to the new table
+                initializeTableSorting();
+                
                 // Optional: Add debug logging
                 console.log("Sent Funds:", funds);
                 console.log("Sent Investments:", cleanInvestments);
@@ -61,11 +64,88 @@ $(document).ready(function() {
     });
 
     $('#export-excel').on('click', function() {
-    // Get the current funds and investments from the previous AJAX call
-    let funds = $('#funds').val();
-    let investments = $('#investments').val() || '';
-    
-    // Redirect to the same page with export parameter
-    window.location.href = '../src/api/getFunds.php?export=excel&funds=' + encodeURIComponent(funds) + '&investments=' + encodeURIComponent(investments);
-});
+        // Get the current funds and investments from the previous AJAX call
+        let funds = $('#funds').val();
+        let investments = $('#investments').val() || '';
+        
+        // Redirect to the same page with export parameter
+        window.location.href = '../src/api/getFunds.php?export=excel&funds=' + encodeURIComponent(funds) + '&investments=' + encodeURIComponent(investments);
+    });
+
+    // Function to initialize table sorting and filtering
+    function initializeTableSorting() {
+        // Add input for filtering
+        $('.results-container').prepend('<input type="text" id="searchInput" placeholder="Search table...">');
+
+        // Global sorting variable to track sort direction
+        let sortDirections = {};
+
+        // Add click event to table headers for sorting
+        $('.funds-table th').each(function(index) {
+            $(this).css('cursor', 'pointer')
+                   .append('<span class="sort-icon">&#9660;</span>');
+            
+            // Initialize sort directions
+            sortDirections[index] = 'asc';
+
+            $(this).click(function() {
+                sortTable(index);
+            });
+        });
+
+        // Search/Filter functionality
+        $('#searchInput').on('keyup', function() {
+            let value = $(this).val().toLowerCase();
+            $(".funds-table tr:not(:first)").filter(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+            });
+        });
+
+        // Table sorting function
+        function sortTable(colIndex) {
+            let table = $('.funds-table');
+            let rows = table.find('tr:gt(0)').toArray();
+
+            // Toggle sort direction
+            let currentDirection = sortDirections[colIndex];
+            let newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+            sortDirections[colIndex] = newDirection;
+
+            rows.sort(function(a, b) {
+                let aColText = $(a).find('td').eq(colIndex).text();
+                let bColText = $(b).find('td').eq(colIndex).text();
+
+                // Remove $ and , for numeric sorting
+                let aValue = aColText.replace(/[$,]/g, '');
+                let bValue = bColText.replace(/[$,]/g, '');
+
+                // Determine if it's a number or string
+                let aNum = parseFloat(aValue);
+                let bNum = parseFloat(bValue);
+
+                // Check if it's a valid number
+                if (!isNaN(aNum) && !isNaN(bNum)) {
+                    return newDirection === 'asc' ? aNum - bNum : bNum - aNum;
+                }
+
+                // String comparison for non-numeric columns
+                return newDirection === 'asc' 
+                    ? aColText.localeCompare(bColText) 
+                    : bColText.localeCompare(aColText);
+            });
+
+            // Reinsert sorted rows
+            table.find('tbody').empty().append(rows);
+
+            // Update sort icons
+            updateSortIcons(colIndex, newDirection);
+        }
+
+        // Update sort icons to show current sort direction
+        function updateSortIcons(sortedColIndex, direction) {
+            $('.funds-table th .sort-icon').text('');
+            let icon = direction === 'asc' ? '&#9650;' : '&#9660;';
+            $('.funds-table th').eq(sortedColIndex).find('.sort-icon').html(icon);
+        }
+    }
 });
