@@ -6,6 +6,7 @@
     <input id='funds' type='text' placeholder="Enter fund tickers (comma-separated)"></input>
     <input id='investments' type='text' placeholder="Corresponding investments (comma-separated)">
     <button id='submit'>Submit</button>
+    <button id="export-excel" class="btn btn-primary">Export to Excel</button>
     <div id='body'></div>
 </body>
 </html>

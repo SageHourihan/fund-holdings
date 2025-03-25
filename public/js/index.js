@@ -59,4 +59,13 @@ $(document).ready(function() {
             }
         });
     });
+
+    $('#export-excel').on('click', function() {
+    // Get the current funds and investments from the previous AJAX call
+    let funds = $('#funds').val();
+    let investments = $('#investments').val() || '';
+    
+    // Redirect to the same page with export parameter
+    window.location.href = '../src/api/getFunds.php?export=excel&funds=' + encodeURIComponent(funds) + '&investments=' + encodeURIComponent(investments);
+});
 });

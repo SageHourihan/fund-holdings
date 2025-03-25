@@ -3,7 +3,81 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 require_once "../utils/scraper.php";
 
 use services\FundsHandler;
+use services\ExcelExportService;
+
 $fundsHandler = new FundsHandler();
+$excelExportService = new ExcelExportService();
+
+// Check if export is requested
+if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+    // Reuse most of the existing logic for processing funds
+    $funds = isset($_GET['funds']) ? $_GET['funds'] : '';
+    $investmentsInput = isset($_GET['investments']) ? $_GET['investments'] : '';
+
+    if (empty($funds)) {
+        echo "<p>No funds provided</p>";
+        exit;
+    }
+
+    // break string out into each fund and investment
+    $fundArray = array_map('trim', explode(',', $funds));
+    $investmentArray = array_map(function($investment) {
+        // Remove commas and convert to float
+        return floatval(str_replace(',', '', $investment));
+    }, explode(',', $investmentsInput));
+
+    // Validate input
+    if (count($fundArray) !== count($investmentArray)) {
+        echo "<p>Number of funds must match number of investments</p>";
+        exit;
+    }
+
+    // Combine funds and investments into an associative array
+    $fundsInvestments = array_combine($fundArray, $investmentArray);
+
+    // initialize holdings
+    $allHoldings = [];
+
+    // loop through funds
+    foreach($fundsInvestments as $fund => $investment) {
+        // check if fund is in db
+        $check = $fundsHandler->get_fund($fund);
+        
+        if (!$check) {
+            // insert funds if not and then scrape 
+            $fundsHandler->insert_fund($fund);
+        }
+        
+        // Get holdings from scraper and store them with fund name as key
+        $fundHoldings = scrape($fund);
+        if (!empty($fundHoldings)) {
+            $allHoldings[$fund] = [
+                'holdings' => $fundHoldings,
+                'investment' => $investment
+            ];
+        }
+    }
+
+    if (empty($allHoldings)) {
+        echo "<p>No holdings found for the provided funds</p>";
+        exit;
+    }
+
+    // Export to Excel
+    $excelFile = $excelExportService->exportFundHoldingsToExcel($allHoldings);
+    
+    // Set headers for file download
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $excelFile['filename'] . '"');
+    header('Content-Length: ' . filesize($excelFile['file']));
+    
+    // Output the file
+    readfile($excelFile['file']);
+    
+    // Clean up temporary file
+    unlink($excelFile['file']);
+    exit;
+}
 
 // Debug function to log detailed information
 function debugLog($message) {
@@ -14,8 +88,8 @@ function debugLog($message) {
 $funds = isset($_GET['funds']) ? $_GET['funds'] : '';
 $investmentsInput = isset($_GET['investments']) ? $_GET['investments'] : '';
 
-debugLog("Received Funds: " . $funds);
-debugLog("Received Investments: " . $investmentsInput);
+//debugLog("Received Funds: " . $funds);
+//debugLog("Received Investments: " . $investmentsInput);
 
 if (empty($funds)) {
     echo "<p>No funds provided</p>";
@@ -29,8 +103,8 @@ $investmentArray = array_map(function($investment) {
     return floatval(str_replace(',', '', $investment));
 }, explode(',', $investmentsInput));
 
-debugLog("Fund Array: " . print_r($fundArray, true));
-debugLog("Investment Array: " . print_r($investmentArray, true));
+//debugLog("Fund Array: " . print_r($fundArray, true));
+//debugLog("Investment Array: " . print_r($investmentArray, true));
 
 // Validate input
 if (count($fundArray) !== count($investmentArray)) {
@@ -41,7 +115,7 @@ if (count($fundArray) !== count($investmentArray)) {
 // Combine funds and investments into an associative array
 $fundsInvestments = array_combine($fundArray, $investmentArray);
 
-debugLog("Funds and Investments: " . print_r($fundsInvestments, true));
+//debugLog("Funds and Investments: " . print_r($fundsInvestments, true));
 
 // initialize holdings
 $allHoldings = [];
