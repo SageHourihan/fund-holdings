@@ -1,7 +1,12 @@
 <?php include_once 'views/header.html' ?>
  <body>
-    <script src="index.js"></script>
+    <div id="loader" class="loader" style="display:none;">
+        <div class="spinner"></div>
+    </div>
     <input id='funds' type='text'></input>
     <button id='submit'>Submit</button>
-  </body>
+    <div id='body'>
+        
+    </div>  
+</body>
 </html>
