@@ -1,3 +1,7 @@
+#export-excel{
+    display: none; 
+}
+
 .funds-table {
     width: 100%;
     border-collapse: collapse;

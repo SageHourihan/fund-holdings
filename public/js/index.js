@@ -42,7 +42,7 @@ $(document).ready(function() {
             success: function(response){
                 // Hide loader
                 $('#loader').hide();
-                
+                $('#export-excel').show();                
                 // Clear previous content and insert the new table
                 $('#body').html(response);
                 
