@@ -8,5 +8,6 @@
     <button id='submit'>Submit</button>
     <button id="export-excel" class="btn btn-primary">Export to Excel</button>
     <div id='body'></div>
+    <button id="top">Go To Top</button>
 </body>
 </html>
