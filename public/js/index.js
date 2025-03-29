@@ -148,4 +148,21 @@ $(document).ready(function() {
             $('.funds-table th').eq(sortedColIndex).find('.sort-icon').html(icon);
         }
     }
+
+     let top = $("#top");
+  
+    // When the user scrolls down 20px from the top of the document, show the button
+    $(window).scroll(function() {
+        if ($(document).scrollTop() > 20) {
+            top.show();
+        } else {
+            top.hide();
+        }
+    });
+  
+    // When the user clicks on the button, scroll to the top of the document
+    $("#top").click(function() {
+        $("html, body").animate({scrollTop: 0}, "fast");
+        return false;
+    });
 });
