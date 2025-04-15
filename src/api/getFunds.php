@@ -1,4 +1,4 @@
-<?php 
+<?php
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once "../utils/scraper.php";
 
@@ -42,12 +42,12 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
     foreach($fundsInvestments as $fund => $investment) {
         // check if fund is in db
         $check = $fundsHandler->get_fund($fund);
-        
+
         if (!$check) {
-            // insert funds if not and then scrape 
+            // insert funds if not and then scrape
             $fundsHandler->insert_fund($fund);
         }
-        
+
         // Get holdings from scraper and store them with fund name as key
         $fundHoldings = scrape($fund);
         if (!empty($fundHoldings)) {
@@ -65,15 +65,15 @@ if (isset($_GET['export']) && $_GET['export'] === 'excel') {
 
     // Export to Excel
     $excelFile = $excelExportService->exportFundHoldingsToExcel($allHoldings);
-    
+
     // Set headers for file download
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $excelFile['filename'] . '"');
     header('Content-Length: ' . filesize($excelFile['file']));
-    
+
     // Output the file
     readfile($excelFile['file']);
-    
+
     // Clean up temporary file
     unlink($excelFile['file']);
     exit;
@@ -124,15 +124,15 @@ $allHoldings = [];
 foreach($fundsInvestments as $fund => $investment) {
     // Ensure investment is a valid number
     $investment = max(0, floatval($investment));
-    
+
     // check if fund is in db
     $check = $fundsHandler->get_fund($fund);
-    
+
     if (!$check) {
-        // insert funds if not and then scrape 
+        // insert funds if not and then scrape
         $fundsHandler->insert_fund($fund);
-        
-        // Get holdings from scraper and store them with fund name as key
+
+        // Get holdings from scraper since fund wasn't in the database
         $fundHoldings = scrape($fund);
         if (!empty($fundHoldings)) {
             $allHoldings[$fund] = [
@@ -141,8 +141,15 @@ foreach($fundsInvestments as $fund => $investment) {
             ];
         }
     } else {
-        // If fund exists, get holdings
-        $fundHoldings = scrape($fund);
+        // Fund exists, get holdings from database instead of scraping
+        $fund_id = $check['id'];
+        $fundHoldings = $fundsHandler->get_fund($fund_id);
+
+        if (empty($fundHoldings)) {
+            // If no holdings found in database, fallback to scraping
+            $fundHoldings = scrape($fund);
+        }
+
         if (!empty($fundHoldings)) {
             $allHoldings[$fund] = [
                 'holdings' => $fundHoldings,
@@ -180,10 +187,10 @@ $totalFundsProcessed = 0;
 foreach ($allHoldings as $fund => $fundData) {
     $holdings = $fundData['holdings'];
     $investment = $fundData['investment'];
-    
+
     $fund_id = $fundsHandler->get_fund($fund)['id'];
     $totalFundsProcessed++;
-    
+
     foreach ($holdings as $holding) {
         // Safely parse percentage
         $percentageDecimal = 0;
@@ -202,13 +209,15 @@ foreach ($allHoldings as $fund => $fundData) {
 
         // Calculate value of shares (using percentage of investment)
         $sharesValue = round(max(0, $percentageDecimal * $investment), 2);
-        
-        // Insert holding into database
-        $fundsHandler->insert_holding($fund_id, $holding);
-        
+
+        // Insert holding into database only if it was newly scraped
+        if (!$check) {
+            $fundsHandler->insert_holding($fund_id, $holding);
+        }
+
         // Accumulate total investment value
         $totalInvestmentValue += $sharesValue;
-        
+
         echo '<tr>';
         echo '<td>' . htmlspecialchars($fund) . '</td>';
         echo '<td>$' . number_format($investment, 2) . '</td>';
